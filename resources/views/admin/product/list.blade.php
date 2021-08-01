@@ -49,30 +49,37 @@
         <div class="card m-b-30">
           <div class="card-body">
 
-            <h4 class="mt-0 header-title">All List Produk</h4>
+            <h4 class="mt-0 header-title ">All List Produk</h4>
 
-            <table id="datatable" class="table table-striped table-bordered dt-responsive nowrap"
-              style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-              <thead>
-                <tr>
-                  <th>Id</th>
-                  <th>Kode Produk</th>
-                  <th>Nama Produk</th>
-                  <th>Kategori</th>
-                  <th>Merk</th>
-                  <th>Harga Beli</th>
-                  <th>Harga Jual</th>
-                  <th>Diskon</th>
-                  <th>Stok</th>
-                  <th>Aksi</th>
-                </tr>
-              </thead>
+            <div class="button-items mb-3">
 
-              <tbody>
+              <button type="button" onClick="deleteSelected('{{ url('administrator/product/delselected') }}')"
+                class="btn btn-danger waves-effect waves-light">Delete Selected</button>
 
-              </tbody>
-            </table>
-
+            </div>
+            <form action="" class="form-produk"> @csrf
+              <table id="datatable" class="table table-striped table-bordered dt-responsive nowrap"
+                style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                <thead>
+                  <tr>
+                    <th>
+                      <input type="checkbox" name="select_all" id="select_all">
+                    </th>
+                    <th>Kode Produk</th>
+                    <th>Nama Produk</th>
+                    <th>Kategori</th>
+                    <th>Merk</th>
+                    <th>Harga Beli</th>
+                    <th>Harga Jual</th>
+                    <th>Diskon</th>
+                    <th>Stok</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                </tbody>
+              </table>
+            </form>
           </div>
         </div>
       </div> <!-- end col -->
@@ -101,45 +108,42 @@
             </div>
 
             <div class="form-group ">
-             <label>Kategori Produk</label>
+              <label>Kategori Produk</label>
               <div>
-                <select class="form-control" name="kategori_id" id="kategori_id" required >
+                <select class="form-control" name="kategori_id" id="kategori_id" required>
                   <option value="">Select Kategori Produk</option>
                   @foreach ($kategorys as $item)
-                  <option value="{{ $item->id }}">{{ $item->nama_kategory }}</option>
+                    <option value="{{ $item->id }}">{{ $item->nama_kategory }}</option>
                   @endforeach
                 </select>
               </div>
             </div>
-            
+
             <div class="form-group">
               <label>Merk</label>
-              <input type="text" class="form-control" name="merk" id="merk" required
-                placeholder="Merk Produk" />
+              <input type="text" class="form-control" name="merk" id="merk" required placeholder="Merk Produk" />
             </div>
-            
+
             <div class="form-group">
               <label>Harga Beli</label>
               <input type="number" class="form-control" name="harga_beli" id="harga_beli" required
                 placeholder="Harga Beli" />
             </div>
-            
+
             <div class="form-group">
               <label>Harga Jual</label>
               <input type="number" class="form-control" name="harga_jual" id="harga_jual" required
                 placeholder="Harga Jual" />
             </div>
-            
+
             <div class="form-group">
               <label>Diskon</label>
-              <input type="number" class="form-control" name="diskon" id="diskon" required
-                placeholder="Diskon (%)" />
+              <input type="number" class="form-control" name="diskon" id="diskon" required placeholder="Diskon (%)" />
             </div>
-            
+
             <div class="form-group">
               <label>Stok</label>
-              <input type="number" class="form-control" name="stok" id="stok" required
-                placeholder="Stok" />
+              <input type="number" class="form-control" name="stok" id="stok" required placeholder="Stok" />
             </div>
 
           </div>
@@ -194,8 +198,10 @@
           type: 'GET'
         },
         columns: [{
-            data: 'id',
-            name: 'id'
+            data: 'select_all',
+            searchable: false,
+            sortable: false,
+            orderable: false
           },
           {
             data: 'kode_produk',
@@ -239,6 +245,9 @@
       });
     })
 
+    $('[name=select_all]').on('click', function() {
+      $(':checkbox').prop('checked', this.checked);
+    })
 
 
     $(document).on('click', '.edit', function() {
@@ -263,7 +272,7 @@
           $('#stok').val(res.stok);
           $('#id_edit').val(res.id);
           $('#btn-tambah').click();
-          
+
         },
         error: function(xhr) {
           toastr.error(xhr.responseJSON.message, 'Inconceivable!');
@@ -340,6 +349,49 @@
         }
       })
     })
+
+    function deleteSelected(url) {
+      if ($('input:checked').length > 0) {
+        Swal.fire({
+          title: 'Are you sure?',
+          text: "You won't be able to revert this!",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            $.ajax({
+              url: url,
+              type: "delete",
+              data: $('.form-produk').serialize(),
+              success: function(res) {
+                if (status = '200') {
+                  setTimeout(() => {
+                    Swal.fire({
+                      position: 'top-end',
+                      icon: 'success',
+                      title: 'Data Berhasil di Hapus',
+                      showConfirmButton: false,
+                      timer: 1500
+                    }).then((res) => {
+                      $("#datatable").DataTable().ajax.reload();
+                    })
+                  })
+                }
+              },
+              error: function(xhr) {
+                toastr.error(xhr.responseJSON.message, 'Inconceivable!');
+              }
+            })
+          }
+        })
+      } else {
+        toastr.error('Selected Data Not Found', 'Inconceivable!');
+        return;
+      }
+    }
 
   </script>
 @endsection

@@ -69,6 +69,7 @@ Route::prefix('administrator')->group(function () {
     Route::post('/product/edit', [ProductController::class, 'editData']);
     Route::post('/product/update', [ProductController::class, 'updateData']);
     Route::post('/product/del', [ProductController::class, 'delData']);
+    Route::delete('/product/delselected', [ProductController::class, 'delDataSelected']);
   });
 });
 

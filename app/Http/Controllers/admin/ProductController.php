@@ -22,7 +22,10 @@ class ProductController extends Controller
           $button = '<button class="btn btn-primary waves-effect waves-light btn-sm edit" id="' . $data->id . '" data-toggle="tooltip" data-placement="right" title="Edit Data Yang Anda Pilih"><i class="fas fa-edit"></i></button>';
           $button .= '<button class="btn btn-sm btn-danger ml-1 hapus" id="' . $data->id . '" name="hapus"><i class="fas fa-trash"></i></button>';
           return $button;
-        })->rawColumns(['aksi'])
+        })
+        ->addColumn('select_all', function ($data) {
+          return '<input type="checkbox" name="id_product[]" value="' . $data->id . '" id="id_product" />';
+        })->rawColumns(['aksi', 'select_all'])
         ->make(true);
     }
 
@@ -123,6 +126,15 @@ class ProductController extends Controller
     }
 
     $data->delete();
+    return response()->json(['message' => 'Data Berhasil Di Hapus'], 200);
+  }
+
+  public function delDataSelected(Request $request)
+  {
+    foreach ($request->id_product as $id) {
+      $data = Produk::find($id);
+      $data->delete();
+    }
     return response()->json(['message' => 'Data Berhasil Di Hapus'], 200);
   }
 }
